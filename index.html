@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>恋口館</title>
+    <!-- Dynamic Pixel Art Favicon "恋" -->
+    <link id="favicon" rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' width='16' height='16'><rect width='16' height='16' fill='%231e1b4b'/><path d='M7 2h2v1H7zm-3 2h8v1H4zm1 2h6v1H5zm2 2h2v1H7zm-4 2h10v1H3zm2 2h6v1H5zm-1 2h8v1H4z' fill='%23ec4899'/></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .aspect-square-media {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        * {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        .smooth-transition {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans antialiased selection:bg-sky-500 selection:text-white pb-12">
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200 px-3 py-2.5 sm:px-4 sm:py-3 flex items-center justify-between shadow-xs">
+        <div class="flex items-center space-x-2.5 sm:space-x-3 truncate">
+            <!-- Header Icon Changed to Black Heart -->
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-900 text-sm sm:text-base flex-shrink-0 overflow-hidden" id="headerAvatar">
+                🖤
+            </div>
+            <div class="truncate">
+                <h1 class="font-bold text-sm sm:text-base leading-tight text-slate-900 truncate" id="headerName">
+                    <span>恋口館</span>
+                </h1>
+                <p class="text-[10px] sm:text-[11px] text-slate-500" id="headerPostCount">0 メディア</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-2 flex-shrink-0">
+            <!-- Batch Upload Button -->
+            <label class="cursor-pointer bg-sky-500 hover:bg-sky-600 active:scale-95 text-white text-xs sm:text-sm font-semibold px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full flex items-center space-x-1 sm:space-x-1.5 shadow-md shadow-sky-500/20 smooth-transition">
+                <i data-lucide="plus" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                <span>投稿追加</span>
+                <input type="file" id="fileInput" accept="image/*,video/*" multiple class="hidden">
+            </label>
+        </div>
+    </header>
+
+    <main class="max-w-2xl w-full mx-auto flex-1 border-x border-slate-200 min-h-screen bg-white shadow-sm">
+        
+        <!-- Profile Section -->
+        <div class="relative">
+            <!-- Header Image -->
+            <div class="relative w-full aspect-[3/1] bg-slate-200 overflow-hidden group">
+                <img id="headerImg" src="" class="w-full h-full object-cover hidden" alt="Header">
+                <div id="headerFallback" class="w-full h-full bg-gradient-to-r from-sky-200 via-indigo-100 to-slate-200 flex items-center justify-center text-slate-400">
+                    <i data-lucide="image" class="w-8 h-8 opacity-50"></i>
+                </div>
+                <label class="absolute inset-0 bg-black/30 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 smooth-transition flex items-center justify-center cursor-pointer text-white text-xs font-medium space-x-1">
+                    <i data-lucide="camera" class="w-4 h-4"></i>
+                    <span>ヘッダーを変更</span>
+                    <input type="file" id="headerInput" accept="image/*" class="hidden">
+                </label>
+            </div>
+
+            <!-- Profile Info Container -->
+            <div class="px-3 sm:px-4 pb-2">
+                <div class="flex justify-between items-end -mt-10 sm:-mt-14 mb-3">
+                    <!-- Avatar Image -->
+                    <div class="relative w-20 h-20 sm:w-28 sm:h-28 rounded-full border-4 border-white bg-slate-100 overflow-hidden group flex-shrink-0 shadow-md">
+                        <img id="avatarImg" src="" class="w-full h-full object-cover hidden" alt="Avatar">
+                        <div id="avatarFallback" class="w-full h-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-xl sm:text-2xl">
+                            ?
+                        </div>
+                        <label class="absolute inset-0 bg-black/30 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 smooth-transition flex items-center justify-center cursor-pointer text-white">
+                            <i data-lucide="camera" class="w-5 h-5"></i>
+                            <input type="file" id="avatarInput" accept="image/*" class="hidden">
+                        </label>
+                    </div>
+
+                    <button id="editProfileBtn" class="border border-slate-300 hover:bg-slate-50 active:bg-slate-100 text-slate-700 text-xs sm:text-sm font-semibold px-3 py-1.5 sm:px-4 sm:py-1.5 rounded-full smooth-transition">
+                        プロフィールを編集
+                    </button>
+                </div>
+
+                <!-- Profile Details Display -->
+                <div id="profileDisplay" class="space-y-1 sm:space-y-1.5">
+                    <div>
+                        <h2 class="text-lg sm:text-xl font-bold text-slate-900 leading-tight" id="dispName">恋口館</h2>
+                        <p class="text-xs text-slate-500" id="dispHandle">@koiguchikan</p>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-700 whitespace-pre-wrap leading-relaxed pt-1" id="dispBio">恋口館へようこそ。写真や動画を一括で追加・閲覧できます。</p>
+                </div>
+
+                <!-- Edit Profile Form -->
+                <div id="profileEditForm" class="hidden mt-3 p-3 sm:p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 smooth-transition">
+                    <h3 class="text-xs font-bold text-sky-600 uppercase tracking-wider">プロフィール編集</h3>
+                    <div>
+                        <label class="text-[11px] text-slate-500 block mb-1">表示名</label>
+                        <input type="text" id="inputName" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label class="text-[11px] text-slate-500 block mb-1">ユーザーID (@...)</label>
+                        <input type="text" id="inputHandle" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label class="text-[11px] text-slate-500 block mb-1">自己紹介文</label>
+                        <textarea id="inputBio" rows="3" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-sky-500 resize-none"></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-2 pt-1">
+                        <button id="cancelEditBtn" class="text-xs text-slate-500 px-3 py-1.5 rounded-lg hover:bg-slate-200">キャンセル</button>
+                        <button id="saveProfileBtn" class="text-xs bg-sky-500 hover:bg-sky-600 text-white font-semibold px-4 py-1.5 rounded-lg">保存</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3 Category Tabs: すべて / 画像 / 動画 -->
+            <div class="flex border-b border-slate-200 text-xs sm:text-sm font-semibold mt-2">
+                <button id="tabAll" class="tab-btn flex-1 text-center py-2.5 sm:py-3 border-b-2 border-sky-500 text-sky-600 font-bold smooth-transition" onclick="switchTab('all')">
+                    すべて
+                </button>
+                <button id="tabImage" class="tab-btn flex-1 text-center py-2.5 sm:py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 smooth-transition" onclick="switchTab('image')">
+                    画像
+                </button>
+                <button id="tabVideo" class="tab-btn flex-1 text-center py-2.5 sm:py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 smooth-transition" onclick="switchTab('video')">
+                    動画
+                </button>
+            </div>
+        </div>
+
+        <!-- Info & Actions Bar -->
+        <div class="p-2.5 sm:p-3 flex items-center justify-between text-[10px] sm:text-[11px] text-slate-500 border-b border-slate-100 bg-slate-50/50">
+            <span class="flex items-center space-x-1 truncate">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500 flex-shrink-0"></i>
+                <span class="truncate">データはお使いの端末（ブラウザ）に保存されます</span>
+            </span>
+            <button id="clearAllBtn" class="text-rose-500 hover:text-rose-600 font-medium flex items-center space-x-0.5 sm:space-x-1 flex-shrink-0 ml-2">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                <span>一括全削除</span>
+            </button>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden flex-col items-center justify-center py-16 sm:py-20 text-center px-4">
+            <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center mb-3 border border-slate-200">
+                <i data-lucide="film" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-slate-700 mb-1">メディアがありません</h3>
+            <p class="text-xs text-slate-400 max-w-xs mb-4">右上の「投稿追加」から画像や動画を一括追加できます。</p>
+        </div>
+
+        <!-- Media Grid (3 Columns) -->
+        <div id="galleryGrid" class="grid grid-cols-3 gap-0.5 sm:gap-1 bg-slate-200">
+        </div>
+    </main>
+
+    <!-- Fullscreen Lightbox Modal (Without Rounded Corners for Uncropped Display) -->
+    <div id="lightbox" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md hidden flex-col justify-between p-2 sm:p-4 smooth-transition opacity-0 select-none">
+        <!-- Top Toolbar -->
+        <div class="w-full flex items-center justify-between p-2 z-20">
+            <button id="deleteActiveMedia" class="text-rose-400 active:text-rose-300 p-2 rounded-full bg-slate-900/80 hover:bg-slate-800 flex items-center space-x-1 text-xs px-3 smooth-transition border border-slate-800">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                <span>削除</span>
+            </button>
+            <div id="lightboxCounter" class="text-xs text-slate-300 font-mono"></div>
+            <button id="closeLightbox" class="text-slate-300 active:text-white p-2 rounded-full bg-slate-900/80 hover:bg-slate-800 smooth-transition border border-slate-800">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- Media Container (Rounded Corners Removed: Display Image As-Is) -->
+        <div class="relative w-full flex-1 flex items-center justify-center my-auto overflow-hidden" id="lightboxTouchArea">
+            <button id="prevBtn" class="absolute left-2 z-10 p-2 sm:p-3 rounded-full bg-black/50 text-white hover:bg-black/80 smooth-transition">
+                <i data-lucide="chevron-left" class="w-6 h-6"></i>
+            </button>
+            
+            <img id="lightboxImg" src="" alt="Preview" class="hidden max-w-full max-h-[82vh] object-contain select-none rounded-none shadow-2xl smooth-transition">
+            <video id="lightboxVideo" controls autoplay loop class="hidden max-w-full max-h-[82vh] object-contain rounded-none shadow-2xl smooth-transition"></video>
+
+            <button id="nextBtn" class="absolute right-2 z-10 p-2 sm:p-3 rounded-full bg-black/50 text-white hover:bg-black/80 smooth-transition">
+                <i data-lucide="chevron-right" class="w-6 h-6"></i>
+            </button>
+        </div>
+
+        <!-- Footer Meta -->
+        <div id="lightboxMeta" class="p-2 text-center text-xs text-slate-400 truncate w-full z-20"></div>
+    </div>
+
+    <script>
+        // Set URL to contain "koikuchi-kan" via Hash Navigation
+        if (!window.location.hash || window.location.hash !== '#koikuchi-kan') {
+            history.replaceState(null, '', '#koikuchi-kan');
+        }
+
+        const DB_NAME = 'PrivateMediaXDB';
+        const DB_VERSION = 2;
+        const STORE_MEDIA = 'media';
+        const STORE_PROFILE = 'profile';
+        let db;
+        
+        let allMediaList = [];
+        let filteredMediaList = [];
+        let currentTab = 'all'; 
+        let currentIndex = -1;
+
+        lucide.createIcons();
+
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onupgradeneeded = (e) => {
+                    db = e.target.result;
+                    if (!db.objectStoreNames.contains(STORE_MEDIA)) {
+                        db.createObjectStore(STORE_MEDIA, { keyPath: 'id' });
+                    }
+                    if (!db.objectStoreNames.contains(STORE_PROFILE)) {
+                        db.createObjectStore(STORE_PROFILE, { keyPath: 'key' });
+                    }
+                };
+                request.onsuccess = (e) => {
+                    db = e.target.result;
+                    resolve(db);
+                };
+                request.onerror = (e) => reject(e);
+            });
+        }
+
+        function getAllMedia() {
+            return new Promise((resolve) => {
+                const tx = db.transaction(STORE_MEDIA, 'readonly');
+                const store = tx.objectStore(STORE_MEDIA);
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result || []);
+            });
+        }
+
+        function saveMediaItem(item) {
+            return new Promise((resolve) => {
+                const tx = db.transaction(STORE_MEDIA, 'readwrite');
+                const store = tx.objectStore(STORE_MEDIA);
+                const request = store.put(item);
+                request.onsuccess = () => resolve();
+            });
+        }
+
+        function deleteMediaFromDB(id) {
+            return new Promise((resolve) => {
+                const tx = db.transaction(STORE_MEDIA, 'readwrite');
+                const store = tx.objectStore(STORE_MEDIA);
+                const request = store.delete(id);
+                request.onsuccess = () => resolve();
+            });
+        }
+
+        function clearAllMediaFromDB() {
+            return new Promise((resolve) => {
+                const tx = db.transaction(STORE_MEDIA, 'readwrite');
+                const store = tx.objectStore(STORE_MEDIA);
+                const request = store.clear();
+                request.onsuccess = () => resolve();
+            });
+        }
+
+        function getProfileData(key) {
+            return new Promise((resolve) => {
+                const tx = db.transaction(STORE_PROFILE, 'readonly');
+                const store = tx.objectStore(STORE_PROFILE);
+                const request = store.get(key);
+                request.onsuccess = () => resolve(request.result ? request.result.val : null);
+                request.onerror = () => resolve(null);
+            });
+        }
+
+        function setProfileData(key, val) {
+            return new Promise((resolve) => {
+                const tx = db.transaction(STORE_PROFILE, 'readwrite');
+                const store = tx.objectStore(STORE_PROFILE);
+                const request = store.put({ key, val });
+                request.onsuccess = () => resolve();
+            });
+        }
+
+        // Element Refs
+        const galleryGrid = document.getElementById('galleryGrid');
+        const emptyState = document.getElementById('emptyState');
+        const fileInput = document.getElementById('fileInput');
+        const headerPostCount = document.getElementById('headerPostCount');
+        
+        const dispName = document.getElementById('dispName');
+        const dispHandle = document.getElementById('dispHandle');
+        const dispBio = document.getElementById('dispBio');
+        const headerName = document.getElementById('headerName');
+        const headerAvatar = document.getElementById('headerAvatar');
+        const avatarImg = document.getElementById('avatarImg');
+        const avatarFallback = document.getElementById('avatarFallback');
+        const headerImg = document.getElementById('headerImg');
+        const headerFallback = document.getElementById('headerFallback');
+        
+        const editProfileBtn = document.getElementById('editProfileBtn');
+        const profileEditForm = document.getElementById('profileEditForm');
+        const inputName = document.getElementById('inputName');
+        const inputHandle = document.getElementById('inputHandle');
+        const inputBio = document.getElementById('inputBio');
+        const saveProfileBtn = document.getElementById('saveProfileBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const avatarInput = document.getElementById('avatarInput');
+        const headerInput = document.getElementById('headerInput');
+
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightboxImg');
+        const lightboxVideo = document.getElementById('lightboxVideo');
+        const lightboxMeta = document.getElementById('lightboxMeta');
+        const lightboxCounter = document.getElementById('lightboxCounter');
+        const closeLightbox = document.getElementById('closeLightbox');
+        const deleteActiveMedia = document.getElementById('deleteActiveMedia');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        const lightboxTouchArea = document.getElementById('lightboxTouchArea');
+
+        // Switch Tabs
+        function switchTab(type) {
+            currentTab = type;
+            ['tabAll', 'tabImage', 'tabVideo'].forEach(tabId => {
+                const btn = document.getElementById(tabId);
+                btn.className = "tab-btn flex-1 text-center py-2.5 sm:py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 smooth-transition";
+            });
+
+            const activeBtn = document.getElementById(type === 'all' ? 'tabAll' : type === 'image' ? 'tabImage' : 'tabVideo');
+            activeBtn.className = "tab-btn flex-1 text-center py-2.5 sm:py-3 border-b-2 border-sky-500 text-sky-600 font-bold smooth-transition";
+
+            renderGallery();
+        }
+
+        // Render Gallery with Filters
+        async function renderGallery() {
+            allMediaList = await getAllMedia();
+            allMediaList.sort((a, b) => b.timestamp - a.timestamp);
+
+            if (currentTab === 'image') {
+                filteredMediaList = allMediaList.filter(item => item.type === 'image');
+            } else if (currentTab === 'video') {
+                filteredMediaList = allMediaList.filter(item => item.type === 'video');
+            } else {
+                filteredMediaList = [...allMediaList];
+            }
+
+            galleryGrid.innerHTML = '';
+            headerPostCount.textContent = `${allMediaList.length} メディア`;
+
+            if (filteredMediaList.length === 0) {
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+            } else {
+                emptyState.classList.add('hidden');
+                emptyState.classList.remove('flex');
+
+                filteredMediaList.forEach((item, index) => {
+                    const aspectDiv = document.createElement('div');
+                    aspectDiv.className = 'relative aspect-square bg-slate-100 overflow-hidden cursor-pointer group hover:opacity-90 smooth-transition';
+
+                    if (item.type === 'video') {
+                        aspectDiv.innerHTML = `
+                            <video src="${item.dataUrl}" class="aspect-square-media pointer-events-none" preload="metadata"></video>
+                            <div class="absolute top-1.5 right-1.5 bg-black/60 text-white p-1 rounded-md text-[10px] flex items-center">
+                                <i data-lucide="play" class="w-3 h-3 fill-white"></i>
+                            </div>
+                        `;
+                    } else {
+                        aspectDiv.innerHTML = `<img src="${item.dataUrl}" class="aspect-square-media">`;
+                    }
+
+                    aspectDiv.addEventListener('click', () => openLightbox(index));
+                    galleryGrid.appendChild(aspectDiv);
+                });
+                lucide.createIcons();
+            }
+        }
+
+        // Load Profile
+        async function loadProfile() {
+            const name = await getProfileData('name') || '恋口館';
+            const handle = await getProfileData('handle') || '@koiguchikan';
+            const bio = await getProfileData('bio') || '恋口館へようこそ。写真や動画を一括で追加・閲覧できます。';
+            const avatar = await getProfileData('avatar');
+            const header = await getProfileData('header');
+
+            dispName.textContent = name;
+            headerName.querySelector('span').textContent = name;
+            dispHandle.textContent = handle;
+            dispBio.textContent = bio;
+
+            if (avatar) {
+                avatarImg.src = avatar;
+                avatarImg.classList.remove('hidden');
+                avatarFallback.classList.add('hidden');
+            } else {
+                avatarImg.classList.add('hidden');
+                avatarFallback.classList.remove('hidden');
+                avatarFallback.textContent = name.charAt(0) || '?';
+            }
+
+            if (header) {
+                headerImg.src = header;
+                headerImg.classList.remove('hidden');
+                headerFallback.classList.add('hidden');
+            } else {
+                headerImg.classList.add('hidden');
+                headerFallback.classList.remove('hidden');
+            }
+        }
+
+        // Direct Avatar / Header Upload
+        avatarInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (evt) => {
+                await setProfileData('avatar', evt.target.result);
+                await loadProfile();
+            };
+            reader.readAsDataURL(file);
+            avatarInput.value = '';
+        });
+
+        headerInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (evt) => {
+                await setProfileData('header', evt.target.result);
+                await loadProfile();
+            };
+            reader.readAsDataURL(file);
+            headerInput.value = '';
+        });
+
+        // Edit Profile
+        editProfileBtn.addEventListener('click', () => {
+            inputName.value = dispName.textContent;
+            inputHandle.value = dispHandle.textContent;
+            inputBio.value = dispBio.textContent;
+            profileEditForm.classList.remove('hidden');
+        });
+
+        cancelEditBtn.addEventListener('click', () => profileEditForm.classList.add('hidden'));
+
+        saveProfileBtn.addEventListener('click', async () => {
+            await setProfileData('name', inputName.value);
+            await setProfileData('handle', inputHandle.value);
+            await setProfileData('bio', inputBio.value);
+            profileEditForm.classList.add('hidden');
+            await loadProfile();
+        });
+
+        // Batch File Upload
+        fileInput.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files);
+            if (!files.length) return;
+
+            for (const file of files) {
+                const isVideo = file.type.startsWith('video/');
+                const reader = new FileReader();
+                await new Promise(res => {
+                    reader.onload = async (event) => {
+                        const mediaObj = {
+                            id: 'media_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                            type: isVideo ? 'video' : 'image',
+                            dataUrl: event.target.result,
+                            timestamp: Date.now()
+                        };
+                        await saveMediaItem(mediaObj);
+                        res();
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+            await renderGallery();
+            fileInput.value = '';
+        });
+
+        // Lightbox Functions
+        function openLightbox(index) {
+            if (index < 0 || index >= filteredMediaList.length) return;
+            currentIndex = index;
+            const item = filteredMediaList[currentIndex];
+
+            const dateStr = new Date(item.timestamp).toLocaleString('ja-JP');
+            lightboxMeta.textContent = dateStr; 
+            lightboxCounter.textContent = `${currentIndex + 1} / ${filteredMediaList.length}`;
+
+            prevBtn.style.display = currentIndex > 0 ? 'flex' : 'none';
+            nextBtn.style.display = currentIndex < filteredMediaList.length - 1 ? 'flex' : 'none';
+
+            if (item.type === 'video') {
+                lightboxImg.classList.add('hidden');
+                lightboxVideo.src = item.dataUrl;
+                lightboxVideo.classList.remove('hidden');
+            } else {
+                lightboxVideo.pause();
+                lightboxVideo.classList.add('hidden');
+                lightboxImg.src = item.dataUrl;
+                lightboxImg.classList.remove('hidden');
+            }
+
+            lightbox.classList.remove('hidden');
+            lightbox.classList.add('flex');
+            setTimeout(() => lightbox.classList.remove('opacity-0'), 10);
+        }
+
+        function closeLightboxModal() {
+            lightbox.classList.add('opacity-0');
+            setTimeout(() => {
+                lightbox.classList.add('hidden');
+                lightbox.classList.remove('flex');
+                lightboxVideo.pause();
+                lightboxVideo.src = '';
+                currentIndex = -1;
+            }, 200);
+        }
+
+        prevBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentIndex > 0) openLightbox(currentIndex - 1);
+        });
+
+        nextBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentIndex < filteredMediaList.length - 1) openLightbox(currentIndex + 1);
+        });
+
+        closeLightbox.addEventListener('click', closeLightboxModal);
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox || e.target === lightboxTouchArea) closeLightboxModal();
+        });
+
+        // Swipe Handler
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        lightboxTouchArea.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        lightboxTouchArea.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, { passive: true });
+
+        function handleSwipe() {
+            const swipeDistance = touchEndX - touchStartX;
+            if (Math.abs(swipeDistance) > 40) {
+                if (swipeDistance < 0 && currentIndex < filteredMediaList.length - 1) {
+                    openLightbox(currentIndex + 1);
+                } else if (swipeDistance > 0 && currentIndex > 0) {
+                    openLightbox(currentIndex - 1);
+                }
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (currentIndex === -1) return;
+            if (e.key === 'ArrowLeft' && currentIndex > 0) openLightbox(currentIndex - 1);
+            if (e.key === 'ArrowRight' && currentIndex < filteredMediaList.length - 1) openLightbox(currentIndex + 1);
+            if (e.key === 'Escape') closeLightboxModal();
+        });
+
+        deleteActiveMedia.addEventListener('click', async () => {
+            if (currentIndex === -1) return;
+            const item = filteredMediaList[currentIndex];
+            if (confirm('このメディアを削除しますか？')) {
+                await deleteMediaFromDB(item.id);
+                await renderGallery();
+                if (filteredMediaList.length === 0) {
+                    closeLightboxModal();
+                } else {
+                    const nextIdx = currentIndex >= filteredMediaList.length ? filteredMediaList.length - 1 : currentIndex;
+                    openLightbox(nextIdx);
+                }
+            }
+        });
+
+        clearAllBtn.addEventListener('click', async () => {
+            if (allMediaList.length === 0) return;
+            if (confirm('すべての画像・動画を全削除しますか？')) {
+                await clearAllMediaFromDB();
+                await renderGallery();
+            }
+        });
+
+        // App Init
+        initDB().then(() => {
+            loadProfile();
+            renderGallery();
+        });
+    </script>
+</body>
+</html>
